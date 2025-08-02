@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minigame - Fase 1</title>
+  <link rel="stylesheet" href="q1.css" />
+  <style>
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .popup-content {
+      background: #fff;
+      color: #000;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 300px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+    .popup-content button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #00f0ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="question-container">
+    <h2 id="titulo"></h2>
+    <p id="pergunta"></p>
+    <ul id="opcoes"></ul>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content" id="popupContent">
+      <p id="popupMessage"></p>
+      <button onclick="proximaQuestao()">Próximo</button>
+    </div>
+  </div>
+
+  <script>
+    const questoesBase = [
+      {
+        titulo: "Questão 1",
+        pergunta: "Qual a frequência cardíaca normal em adultos?",
+        opcoes: ["60 a 100 bpm", "40 a 60 bpm", "100 a 120 bpm"],
+        correta: 0
+      },
+      {
+        titulo: "Questão 2",
+        pergunta: "Qual o valor normal da pressão arterial?",
+        opcoes: ["120x80 mmHg", "90x60 mmHg", "140x100 mmHg"],
+        correta: 0
+      },
+      {
+        titulo: "Questão 3",
+        pergunta: "Qual a temperatura corporal considerada febre?",
+        opcoes: ["37°C", "37,8°C", "36,5°C"],
+        correta: 1
+      },
+      {
+        titulo: "Questão 4",
+        pergunta: "Qual é a principal artéria utilizada para medir pulso no braço?",
+        opcoes: ["Carótida", "Femoral", "Radial"],
+        correta: 2
+      },
+      {
+        titulo: "Questão 5",
+        pergunta: "Qual o valor normal da saturação de oxigênio (SpO2)?",
+        opcoes: ["Acima de 95%", "75%", "Entre 80% e 85%"],
+        correta: 0
+      }
+    ];
+
+    let fila = [...questoesBase];
+    let questaoAtual = 0;
+    let erros = 0;
+
+    function renderizarQuestao() {
+      const q = fila[questaoAtual];
+      document.getElementById("titulo").innerText = q.titulo;
+      document.getElementById("pergunta").innerText = q.pergunta;
+
+      const ul = document.getElementById("opcoes");
+      ul.innerHTML = "";
+      q.opcoes.forEach((op, i) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.innerText = op;
+        btn.onclick = () => verificarResposta(i);
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+    }
+
+    function verificarResposta(escolhida) {
+      const correta = fila[questaoAtual].correta;
+      const isCorreta = escolhida === correta;
+
+      if (isCorreta) {
+        document.getElementById("popupMessage").innerText = "Parabéns 🎉";
+        document.getElementById("popup").style.display = "flex";
+      } else {
+        erros++;
+        if (erros > 3) {
+          alert("Você errou mais de 4 vezes. Reiniciando...");
+          fila = [...questoesBase];
+          questaoAtual = 0;
+          erros = 0;
+          renderizarQuestao();
+          return;
+        }
+
+        const errada = fila[questaoAtual];
+        fila.splice(questaoAtual, 1);
+        const pos = Math.floor(Math.random() * (fila.length + 1));
+        fila.splice(pos, 0, errada);
+
+        alert("Não foi dessa vez 😢");
+        renderizarQuestao();
+      }
+    }
+
+    function proximaQuestao() {
+      document.getElementById("popup").style.display = "none";
+      questaoAtual++;
+
+      if (questaoAtual >= fila.length) {
+        alert("Você concluiu o módulo!");
+        fila = [...questoesBase];
+        questaoAtual = 0;
+        erros = 0;
+      }
+
+      renderizarQuestao();
+    }
+
+    window.onload = renderizarQuestao;
+  </script>
+</body>
+</html>
