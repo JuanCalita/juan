@@ -1,12 +1,146 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Minigame - Fase 1</title>
-  <link rel="stylesheet" href="q1.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minigames - Módulo 1</title>
+  <link rel="stylesheet" href="style.css">
   <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background-color: #111;
+      color: #f0f0f0;
+    }
+    .language-switch {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+    }
+    .lang-btn {
+      font-size: 22px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      margin-left: 6px;
+    }
+    .lang-btn.active {
+      font-weight: bold;
+    }
+    .sidebar {
+      background-color: #222;
+      padding: 20px;
+      width: 220px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+    .sidebar h2 {
+      margin-bottom: 20px;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar li {
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    .main {
+      margin-left: 240px;
+      padding: 20px;
+    }
+    .unit {
+      background: #1c1c1c;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+    .unit h3 {
+      margin: 0;
+    }
+    .unit p {
+      color: #aaa;
+    }
+    .start, .guide {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .start {
+      background: #00f0ff;
+      color: #000;
+    }
+    .guide {
+      background: #444;
+      color: #fff;
+    }
+    .lesson.success {
+      margin-top: 10px;
+      font-size: 20px;
+    }
+    #minigame-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1000;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    #minigame-modal.active {
+      display: flex;
+    }
+    .minigame-content {
+      background: #222;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px #000;
+      padding: 30px 20px 20px 20px;
+      max-width: 370px;
+      width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      color: #f0f0f0;
+    }
+    #fechar-minigame {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: #ff69f6;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1010;
+    }
+    .question-container { text-align: center; margin-top: 20px; }
+    .minigame-content ul { list-style-type: none; padding: 0; }
+    .minigame-content .option {
+      background-color: #00f0ff;
+      color: #0d1117;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .minigame-content .option:hover {
+      transform: scale(1.05);
+      background-color: #ff69f6;
+      color: white;
+    }
     .popup {
       position: fixed;
       top: 0; left: 0;
@@ -15,7 +149,7 @@
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 999;
+      z-index: 2000;
     }
     .popup-content {
       background: #fff;
@@ -36,121 +170,361 @@
       font-weight: bold;
       cursor: pointer;
     }
+    #progresso {
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 5px;
+      margin: 18px 0 10px 0;
+      overflow: hidden;
+    }
+    #barraProgresso {
+      height: 100%;
+      background: #00f0ff;
+      width: 0;
+      transition: width 0.3s;
+    }
+    @media (max-width: 500px) {
+      .minigame-content { padding: 10px 5px 10px 5px; }
+      #progresso { margin: 12px 0 8px 0; }
+    }
   </style>
 </head>
 <body>
-  <div class="question-container">
-    <h2 id="titulo"></h2>
-    <p id="pergunta"></p>
-    <ul id="opcoes"></ul>
+  <div class="language-switch">
+    <button id="pt-br" class="lang-btn active">BR</button>
+    <button id="en-us" class="lang-btn">US</button>
   </div>
 
-  <div class="popup" id="popup">
-    <div class="popup-content" id="popupContent">
-      <p id="popupMessage"></p>
-      <button onclick="proximaQuestao()">Próximo</button>
+  <div class="sidebar">
+    <h2>Minigames</h2>
+    <ul>
+      <li class="active"><img src="icon.png" alt=""> Sinais Vitais🩺</li>
+      <li><img src="icon.png" alt=""> ECG📈</li>
+      <li><img src="icon.png" alt=""> Home🏠</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="unit">
+      <div>
+        <h3>SINAIS VITAIS - MÓDULO 1</h3>
+        <p>Noções básicas</p>
+      </div>
+      <button class="start">COMEÇAR</button>
+      <button class="guide">Guia</button>
+      <div class="lesson success">⭐</div>
+    </div>
+
+    <div class="unit">
+      <div>
+        <h3>SINAIS VITAIS - MÓDULO 2</h3>
+        <p>Adultos</p>
+      </div>
+      <button class="start" disabled>BLOQUEADO</button>
+      <button class="guide">Guia</button>
+      <div class="lesson">🔒</div>
+    </div>
+  </div>
+
+  <!-- Modal Minigame -->
+  <div id="minigame-modal">
+    <div class="minigame-content">
+      <button id="fechar-minigame">Fechar</button>
+      <div class="question-container">
+        <h2 id="titulo"></h2>
+        <p id="pergunta"></p>
+        <div id="progresso">
+          <div id="barraProgresso"></div>
+        </div>
+        <ul id="opcoes"></ul>
+      </div>
+      <div class="popup" id="popup">
+        <div class="popup-content" id="popupContent">
+          <p id="popupMessage"></p>
+          <button onclick="proximaQuestao()">Próximo</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    const questoesBase = [
-      {
-        titulo: "Questão 1",
-        pergunta: "Qual a frequência cardíaca normal em adultos?",
-        opcoes: ["60 a 100 bpm", "40 a 60 bpm", "100 a 120 bpm"],
-        correta: 0
-      },
-      {
-        titulo: "Questão 2",
-        pergunta: "Qual o valor normal da pressão arterial?",
-        opcoes: ["120x80 mmHg", "90x60 mmHg", "140x100 mmHg"],
-        correta: 0
-      },
-      {
-        titulo: "Questão 3",
-        pergunta: "Qual a temperatura corporal considerada febre?",
-        opcoes: ["37°C", "37,8°C", "36,5°C"],
-        correta: 1
-      },
-      {
-        titulo: "Questão 4",
-        pergunta: "Qual é a principal artéria utilizada para medir pulso no braço?",
-        opcoes: ["Carótida", "Femoral", "Radial"],
-        correta: 2
-      },
-      {
-        titulo: "Questão 5",
-        pergunta: "Qual o valor normal da saturação de oxigênio (SpO2)?",
-        opcoes: ["Acima de 95%", "75%", "Entre 80% e 85%"],
-        correta: 0
-      }
-    ];
-
-    let fila = [...questoesBase];
-    let questaoAtual = 0;
-    let erros = 0;
-
-    function renderizarQuestao() {
-      const q = fila[questaoAtual];
-      document.getElementById("titulo").innerText = q.titulo;
-      document.getElementById("pergunta").innerText = q.pergunta;
-
-      const ul = document.getElementById("opcoes");
-      ul.innerHTML = "";
-      q.opcoes.forEach((op, i) => {
-        const li = document.createElement("li");
-        const btn = document.createElement("button");
-        btn.className = "option";
-        btn.innerText = op;
-        btn.onclick = () => verificarResposta(i);
-        li.appendChild(btn);
-        ul.appendChild(li);
-      });
+  // --- Textos da interface ---
+  const textosSite = {
+    pt: {
+      sidebar: ["Sinais Vitais", "ECG", "Home"],
+      tituloModulo1: "SINAIS VITAIS - MÓDULO 1",
+      descricaoModulo1: "Noções básicas",
+      guia: "Guia",
+      bloqueado: "BLOQUEADO",
+      estrela: "⭐",
+      cadeado: "🔒",
+      tituloModulo2: "SINAIS VITAIS - MÓDULO 2",
+      descricaoModulo2: "Adultos",
+      parabens: "Parabéns 🎉",
+      erro: "Não foi dessa vez 😢",
+      reiniciar: "Você errou 3 vezes. Reiniciando...",
+      fim: "Você concluiu o módulo! 🏆"
+    },
+    en: {
+      sidebar: ["Vital Signs", "ECG", "Home"],
+      tituloModulo1: "VITAL SIGNS - MODULE 1",
+      descricaoModulo1: "Basic notions",
+      guia: "Guide",
+      bloqueado: "LOCKED",
+      estrela: "⭐",
+      cadeado: "🔒",
+      tituloModulo2: "VITAL SIGNS - MODULE 2",
+      descricaoModulo2: "Adults",
+      parabens: "Congratulations 🎉",
+      erro: "Not this time 😢",
+      reiniciar: "You missed 3 times. Restarting...",
+      fim: "You completed the module! 🏆"
     }
+  };
 
-    function verificarResposta(escolhida) {
-      const correta = fila[questaoAtual].correta;
-      const isCorreta = escolhida === correta;
+  // --- Perguntas em Português ---
+  const questoesFase1_pt = [
+    { titulo: "Questão 1", pergunta: "Qual a frequência cardíaca normal em adultos?", opcoes: ["60 a 100 bpm", "40 a 60 bpm", "100 a 120 bpm"], correta: 0 },
+    { titulo: "Questão 2", pergunta: "Qual o valor normal da pressão arterial?", opcoes: ["120x80 mmHg", "90x60 mmHg", "140x100 mmHg"], correta: 0 },
+    { titulo: "Questão 3", pergunta: "Qual a temperatura corporal considerada febre?", opcoes: ["37°C", "37,8°C", "36,5°C"], correta: 1 },
+    { titulo: "Questão 4", pergunta: "Qual é a principal artéria utilizada para medir pulso no braço?", opcoes: ["Carótida", "Femoral", "Radial"], correta: 2 },
+    { titulo: "Questão 5", pergunta: "Qual o valor normal da saturação de oxigênio (SpO2)?", opcoes: ["Acima de 95%", "75%", "Entre 80% e 85%"], correta: 0 },
+    { titulo: "Questão 6", pergunta: "Qual dos parâmetros abaixo NÃO é considerado um dos cinco sinais vitais clássicos?", opcoes: ["Pressão arterial", "Frequência cardíaca", "Saturação de oxigênio", "Nível de glicemia capilar", "Temperatura corporal"], correta: 3 },
+    { titulo: "Questão 7", pergunta: "Alterações nos sinais vitais podem ser um dos primeiros indicadores de problemas clínicos, mesmo antes do aparecimento de sintomas mais específicos.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 8", pergunta: "Em adultos, a frequência cardíaca de repouso normal varia tipicamente de _____ a _____ bpm, enquanto em recém-nascidos ela varia de _____ a _____ bpm.", opcoes: ["60 a 100; 120 a 160", "70 a 110; 100 a 140", "80 a 120; 100 a 120", "60 a 80; 100 a 120"], correta: 0 },
+    { titulo: "Questão 9", pergunta: "Lactentes e crianças tendem a apresentar frequência cardíaca e frequência respiratória mais elevadas que as de adultos, enquanto seus valores normais de pressão arterial são relativamente menores.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 10", pergunta: "Ao medir a pressão arterial pelo método auscultatório, qual técnica está CORRETA?", opcoes: ["Inflar até 240 mmHg sempre", "Posicionar o manguito 2-3 cm acima da fossa cubital, com o braço na altura do coração", "Medir com o paciente em pé", "Permitir que o paciente converse durante a medição"], correta: 1 },
+    { titulo: "Questão 11", pergunta: "Para obter uma frequência respiratória confiável, o profissional deve contar os movimentos respiratórios de forma discreta, sem o paciente perceber.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 12", pergunta: "O dispositivo usado para medir a saturação de oxigênio no sangue, fixado geralmente no dedo, é o __________.", opcoes: ["Esfigmomanômetro", "Oxímetro de pulso", "Termômetro", "Estetoscópio"], correta: 1 },
+    { titulo: "Questão 13", pergunta: "Ao palpar o pulso arterial, deve-se evitar usar o polegar.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 14", pergunta: "Antes de medir a temperatura oral, é recomendado aguardar 15 a 30 minutos caso o paciente tenha ingerido líquidos muito quentes ou frios.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 15", pergunta: "Paciente com PA de 150/95 mmHg apresenta:", opcoes: ["Pressão ótima", "Pressão normal", "Hipertensão estágio 1 (leve)", "Hipertensão estágio 2"], correta: 2 },
+    { titulo: "Questão 16", pergunta: "Um adulto com frequência cardíaca de 50 bpm em repouso está em bradicardia.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 17", pergunta: "Temperatura axilar de 38,2°C corresponde a:", opcoes: ["Temperatura normal", "Febre", "Febrícula", "Hipotermia"], correta: 1 },
+    { titulo: "Questão 18", pergunta: "Adulto com 25 incursões respiratórias por minuto apresenta:", opcoes: ["Bradipneia", "Eupneia", "Taquipneia", "Apneia"], correta: 2 },
+    { titulo: "Questão 19", pergunta: "Saturação de 88% em ar ambiente indica hipoxemia.", opcoes: ["Verdadeiro", "Falso"], correta: 0 }
+  ];
 
-      if (isCorreta) {
-        document.getElementById("popupMessage").innerText = "Parabéns 🎉";
-        document.getElementById("popup").style.display = "flex";
-      } else {
-        erros++;
-        if (erros > 3) {
-          alert("Você errou mais de 4 vezes. Reiniciando...");
-          fila = [...questoesBase];
-          questaoAtual = 0;
-          erros = 0;
-          renderizarQuestao();
-          return;
-        }
+  // Perguntas em inglês
+  const questoesFase1_en = [
+    { titulo: "Question 1", pergunta: "What is the normal resting heart rate for adults?", opcoes: ["60 to 100 bpm", "40 to 60 bpm", "100 to 120 bpm"], correta: 0 },
+    { titulo: "Question 2", pergunta: "What is the normal blood pressure value?", opcoes: ["120x80 mmHg", "90x60 mmHg", "140x100 mmHg"], correta: 0 },
+    { titulo: "Question 3", pergunta: "Which body temperature is considered fever?", opcoes: ["37°C", "37.8°C", "36.5°C"], correta: 1 },
+    { titulo: "Question 4", pergunta: "Which is the main artery used to measure pulse in the arm?", opcoes: ["Carotid", "Femoral", "Radial"], correta: 2 },
+    { titulo: "Question 5", pergunta: "What is the normal value for oxygen saturation (SpO2)?", opcoes: ["Above 95%", "75%", "Between 80% and 85%"], correta: 0 },
+    { titulo: "Question 6", pergunta: "Which parameter below is NOT considered one of the five classical vital signs?", opcoes: ["Blood pressure", "Heart rate", "Oxygen saturation", "Capillary blood glucose level", "Body temperature"], correta: 3 },
+    { titulo: "Question 7", pergunta: "Changes in vital signs can be one of the first indicators of clinical problems, even before more specific symptoms appear.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 8", pergunta: "In adults, normal resting heart rate typically ranges from _____ to _____ bpm, while in newborns it ranges from _____ to _____ bpm.", opcoes: ["60 to 100; 120 to 160", "70 to 110; 100 to 140", "80 to 120; 100 to 120", "60 to 80; 100 to 120"], correta: 0 },
+    { titulo: "Question 9", pergunta: "Infants and children tend to have higher heart and respiratory rates than adults, while their normal blood pressure values are relatively lower.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 10", pergunta: "When measuring blood pressure by the auscultatory method, which technique is CORRECT?", opcoes: ["Always inflate to 240 mmHg", "Place the cuff 2-3 cm above the antecubital fossa, with the arm at heart level", "Measure with the patient standing", "Allow the patient to talk during measurement"], correta: 1 },
+    { titulo: "Question 11", pergunta: "To obtain a reliable respiratory rate, the professional should count the respiratory movements discreetly, without the patient noticing.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 12", pergunta: "The device used to measure blood oxygen saturation, usually placed on the finger, is the __________.", opcoes: ["Sphygmomanometer", "Pulse oximeter", "Thermometer", "Stethoscope"], correta: 1 },
+    { titulo: "Question 13", pergunta: "When palpating the arterial pulse, the thumb should be avoided.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 14", pergunta: "Before measuring oral temperature, it is recommended to wait 15 to 30 minutes if the patient has consumed very hot or cold liquids.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 15", pergunta: "A patient with BP of 150/95 mmHg presents:", opcoes: ["Optimal pressure", "Normal pressure", "Stage 1 (mild) hypertension", "Stage 2 hypertension"], correta: 2 },
+    { titulo: "Question 16", pergunta: "An adult with a resting heart rate of 50 bpm is in bradycardia.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 17", pergunta: "Axillary temperature of 38.2°C corresponds to:", opcoes: ["Normal temperature", "Fever", "Low-grade fever", "Hypothermia"], correta: 1 },
+    { titulo: "Question 18", pergunta: "An adult with 25 respiratory movements per minute presents:", opcoes: ["Bradypnea", "Eupnea", "Tachypnea", "Apnea"], correta: 2 },
+    { titulo: "Question 19", pergunta: "Oxygen saturation of 88% in room air indicates hypoxemia.", opcoes: ["True", "False"], correta: 0 }
+  ];
 
-        const errada = fila[questaoAtual];
-        fila.splice(questaoAtual, 1);
-        const pos = Math.floor(Math.random() * (fila.length + 1));
-        fila.splice(pos, 0, errada);
+  // Fase 2: português
+  const questoesFase2_pt = [
+    { titulo: "Questão 1", pergunta: "O que caracteriza taquicardia em adultos?", opcoes: ["FC > 100 bpm", "FC < 60 bpm", "PA > 140x90 mmHg"], correta: 0 },
+    { titulo: "Questão 2", pergunta: "Bradicardia é definida como:", opcoes: ["PA baixa", "FC < 60 bpm", "Temperatura < 36°C"], correta: 1 },
+    { titulo: "Questão 3", pergunta: "Aferir PA com manguito muito apertado pode causar:", opcoes: ["Leitura normal", "Subestimativa", "Superestimativa da pressão"], correta: 2 },
+    { titulo: "Questão 4", pergunta: "Temperatura oral normal típica é:", opcoes: ["35°C", "36,5°C a 37,5°C", "38°C"], correta: 1 },
+    { titulo: "Questão 5", pergunta: "Para medir frequência respiratória, você deve observar:", opcoes: ["Movimento dos olhos", "Movimento do tórax", "Batimentos cardíacos"], correta: 1 },
+    { titulo: "Questão 6", pergunta: "Paciente adulto chega com FC 118 bpm, PA 85/50 mmHg, FR 28 irpm, temperatura 39,2°C e SpO₂ de 94% em ar ambiente. Esses achados sugerem:", opcoes: ["Crise hipertensiva", "Infarto agudo do miocárdio", "Quadro compatível com sepse", "Hipotireoidismo descompensado"], correta: 2 },
+    { titulo: "Questão 7", pergunta: "A frequência respiratória é frequentemente o primeiro sinal vital a se alterar em quadros de deterioração clínica.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 8", pergunta: "Qual dos seguintes medicamentos pode causar bradicardia como efeito colateral?", opcoes: ["Beta-bloqueadores", "Benzodiazepínicos", "Inibidores da ECA", "Anti-histamínicos"], correta: 0 },
+    { titulo: "Questão 9", pergunta: "A presença de pressão diferencial aumentada (PA sistólica muito maior que a diastólica) pode ser observada em casos de __________, como na insuficiência aórtica.", opcoes: ["Insuficiência mitral", "Hipotensão ortostática", "Insuficiência aórtica", "Choque séptico"], correta: 2 },
+    { titulo: "Questão 10", pergunta: "Pacientes com DPOC podem ter SpO₂ normal mesmo em vigência de retenção de CO₂.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 11", pergunta: "Em um paciente com sinais de hipoperfusão (pele fria, tempo de enchimento capilar > 3s), o achado esperado na aferição dos sinais vitais é:", opcoes: ["Bradicardia", "Taquicardia e hipotensão", "Hipertensão e febre", "Bradipneia com PA elevada"], correta: 1 },
+    { titulo: "Questão 12", pergunta: "Uma temperatura corporal persistentemente abaixo de 35°C em um adulto pode indicar hipotermia grave e requer intervenção imediata.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 13", pergunta: "A ausência de sons de Korotkoff em ambos os braços pode sugerir obstrução arterial grave ou __________.", opcoes: ["Hipertensão maligna", "Choque circulatório", "Arritmia supraventricular", "Hipotireoidismo"], correta: 1 },
+    { titulo: "Questão 14", pergunta: "Paciente adulto com FC 45 bpm, PA 100/60 mmHg, sem sintomas. ECG mostra ritmo sinusal. Qual a conduta imediata?", opcoes: ["Administração de atropina", "Internação em UTI", "Observação clínica, sem intervenção imediata", "Massagem cardíaca"], correta: 2 },
+    { titulo: "Questão 15", pergunta: "PA sistólica <90 mmHg isolada pode ser suficiente para definir choque em alguns protocolos clínicos.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 16", pergunta: "Qual dos sinais abaixo é mais específico para febre de origem infecciosa?", opcoes: ["Temperatura axilar > 37,0°C", "Temperatura oral > 37,5°C", "Temperatura axilar ≥ 38°C acompanhada de taquicardia e calafrios", "Sudorese noturna isolada"], correta: 2 },
+    { titulo: "Questão 17", pergunta: "Em um paciente com fibrilação atrial, o pulso radial pode estar irregular e __________ que a frequência cardíaca auscultada no ápice cardíaco.", opcoes: ["Maior", "Menor", "Igual", "Mais regular"], correta: 1 },
+    { titulo: "Questão 18", pergunta: "O uso de manguito inadequado (muito pequeno) pode causar uma leitura falsamente elevada da pressão arterial.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+    { titulo: "Questão 19", pergunta: "Paciente idoso, acamado, com FR 8 irpm, PA 110/70 mmHg, sonolento, pupilas mióticas. Qual hipótese principal?", opcoes: ["AVC isquêmico", "Crise hipertensiva", "Hipoglicemia", "Intoxicação por opioides"], correta: 3 }
+  ];
 
-        alert("Não foi dessa vez 😢");
-        renderizarQuestao();
-      }
+  // Fase 2: inglês
+  const questoesFase2_en = [
+    { titulo: "Question 1", pergunta: "What characterizes tachycardia in adults?", opcoes: ["HR > 100 bpm", "HR < 60 bpm", "BP > 140x90 mmHg"], correta: 0 },
+    { titulo: "Question 2", pergunta: "Bradycardia is defined as:", opcoes: ["Low BP", "HR < 60 bpm", "Temperature < 36°C"], correta: 1 },
+    { titulo: "Question 3", pergunta: "Measuring blood pressure with a cuff that is too tight may cause:", opcoes: ["Normal reading", "Underestimation", "Overestimation of pressure"], correta: 2 },
+    { titulo: "Question 4", pergunta: "Typical normal oral temperature is:", opcoes: ["35°C", "36.5°C to 37.5°C", "38°C"], correta: 1 },
+    { titulo: "Question 5", pergunta: "To measure respiratory rate, you should observe:", opcoes: ["Eye movement", "Chest movement", "Heartbeats"], correta: 1 },
+    { titulo: "Question 6", pergunta: "Adult patient arrives with HR 118 bpm, BP 85/50 mmHg, RR 28 breaths/min, temperature 39.2°C and SpO₂ 94% on room air. These findings suggest:", opcoes: ["Hypertensive crisis", "Acute myocardial infarction", "Findings compatible with sepsis", "Decompensated hypothyroidism"], correta: 2 },
+    { titulo: "Question 7", pergunta: "Respiratory rate is often the first vital sign to change in cases of clinical deterioration.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 8", pergunta: "Which of the following medications can cause bradycardia as a side effect?", opcoes: ["Beta-blockers", "Benzodiazepines", "ACE inhibitors", "Antihistamines"], correta: 0 },
+    { titulo: "Question 9", pergunta: "The presence of increased pulse pressure (systolic BP much higher than diastolic) can be observed in cases of __________, such as aortic insufficiency.", opcoes: ["Mitral insufficiency", "Orthostatic hypotension", "Aortic insufficiency", "Septic shock"], correta: 2 },
+    { titulo: "Question 10", pergunta: "COPD patients may have normal SpO₂ even with CO₂ retention.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 11", pergunta: "In a patient with signs of hypoperfusion (cold skin, capillary refill time > 3s), the expected finding in vital signs is:", opcoes: ["Bradycardia", "Tachycardia and hypotension", "Hypertension and fever", "Bradypnea with elevated BP"], correta: 1 },
+    { titulo: "Question 12", pergunta: "A body temperature persistently below 35°C in an adult may indicate severe hypothermia and requires immediate intervention.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 13", pergunta: "The absence of Korotkoff sounds in both arms may suggest severe arterial obstruction or __________.", opcoes: ["Malignant hypertension", "Circulatory shock", "Supraventricular arrhythmia", "Hypothyroidism"], correta: 1 },
+    { titulo: "Question 14", pergunta: "Adult patient with HR 45 bpm, BP 100/60 mmHg, asymptomatic. ECG shows sinus rhythm. What is the immediate management?", opcoes: ["Atropine administration", "ICU admission", "Clinical observation, no immediate intervention", "Cardiac massage"], correta: 2 },
+    { titulo: "Question 15", pergunta: "Systolic BP <90 mmHg alone may be sufficient to define shock in some clinical protocols.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 16", pergunta: "Which of the following signs is most specific for fever of infectious origin?", opcoes: ["Axillary temperature > 37.0°C", "Oral temperature > 37.5°C", "Axillary temperature ≥ 38°C accompanied by tachycardia and chills", "Isolated night sweats"], correta: 2 },
+    { titulo: "Question 17", pergunta: "In a patient with atrial fibrillation, the radial pulse may be irregular and __________ than the heart rate auscultated at the cardiac apex.", opcoes: ["Greater", "Lower", "Equal", "More regular"], correta: 1 },
+    { titulo: "Question 18", pergunta: "Using an improperly sized cuff (too small) may cause a falsely elevated blood pressure reading.", opcoes: ["True", "False"], correta: 0 },
+    { titulo: "Question 19", pergunta: "Elderly bedridden patient with RR 8 breaths/min, BP 110/70 mmHg, drowsy, miotic pupils. What is the main hypothesis?", opcoes: ["Ischemic stroke", "Hypertensive crisis", "Hypoglycemia", "Opioid intoxication"], correta: 3 }
+  ];
+
+  // Estado idioma
+  let idiomaAtual = "pt";
+
+  // Arrays dinâmicos
+  let questoesFase1 = [...questoesFase1_pt];
+  let questoesFase2 = [...questoesFase2_pt];
+
+  let fila = [];
+  let questaoAtual = 0;
+  let erros = 0;
+  let faseAtual = 1;
+
+  function aplicarIdioma(idioma) {
+    idiomaAtual = idioma;
+    const sidebarItems = document.querySelectorAll('.sidebar li');
+    textosSite[idioma].sidebar.forEach((txt, i) => {
+      sidebarItems[i].innerHTML = sidebarItems[i].innerHTML.replace(/(<img.+?> )?.*/, '$1' + txt);
+    });
+    document.querySelectorAll('.unit h3')[0].innerText = textosSite[idioma].tituloModulo1;
+    document.querySelectorAll('.unit p')[0].innerText = textosSite[idioma].descricaoModulo1;
+    document.querySelectorAll('.guide')[0].innerText = textosSite[idioma].guia;
+    document.querySelectorAll('.lesson')[0].innerText = textosSite[idioma].estrela;
+
+    document.querySelectorAll('.unit h3')[1].innerText = textosSite[idioma].tituloModulo2;
+    document.querySelectorAll('.unit p')[1].innerText = textosSite[idioma].descricaoModulo2;
+    document.querySelectorAll('.guide')[1].innerText = textosSite[idioma].guia;
+    document.querySelectorAll('.start')[1].innerText = textosSite[idioma].bloqueado;
+    document.querySelectorAll('.lesson')[1].innerText = textosSite[idioma].cadeado;
+  }
+
+  function traduzirQuestoes() {
+    if (idiomaAtual === "pt") {
+      questoesFase1 = [...questoesFase1_pt];
+      questoesFase2 = [...questoesFase2_pt];
+    } else {
+      questoesFase1 = [...questoesFase1_en];
+      questoesFase2 = [...questoesFase2_en];
     }
-
-    function proximaQuestao() {
-      document.getElementById("popup").style.display = "none";
-      questaoAtual++;
-
-      if (questaoAtual >= fila.length) {
-        alert("Você concluiu o módulo!");
-        fila = [...questoesBase];
-        questaoAtual = 0;
-        erros = 0;
-      }
-
+    if (document.getElementById("minigame-modal").classList.contains('active')) {
+      fila = faseAtual === 1 ? [...questoesFase1] : [...questoesFase2];
       renderizarQuestao();
     }
+  }
 
-    window.onload = renderizarQuestao;
+  function iniciarFase(numeroFase) {
+    faseAtual = numeroFase;
+    traduzirQuestoes();
+    questaoAtual = 0;
+    erros = 0;
+    document.getElementById("minigame-modal").classList.add('active');
+    document.body.style.overflow = 'hidden';
+    document.getElementById("popup").style.display = "none";
+    fila = faseAtual === 1 ? [...questoesFase1] : [...questoesFase2];
+    renderizarQuestao();
+  }
+
+  function renderizarQuestao() {
+    const q = fila[questaoAtual];
+    document.getElementById("titulo").innerText = q.titulo;
+    document.getElementById("pergunta").innerText = q.pergunta;
+    const ul = document.getElementById("opcoes");
+    ul.innerHTML = "";
+    q.opcoes.forEach((op, i) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.innerText = op;
+      btn.onclick = () => verificarResposta(i);
+      li.appendChild(btn);
+      ul.appendChild(li);
+    });
+    document.getElementById('barraProgresso').style.width = `${((questaoAtual + 1) / fila.length) * 100}%`;
+  }
+
+  function verificarResposta(escolhida) {
+    document.querySelectorAll('.option').forEach(btn => btn.disabled = true);
+    const correta = fila[questaoAtual].correta;
+    if (escolhida === correta) {
+      document.getElementById("popupMessage").innerText = textosSite[idiomaAtual].parabens;
+      document.getElementById("popup").style.display = "flex";
+    } else {
+      erros++;
+      if (erros >= 3) {
+        fila = faseAtual === 1 ? [...questoesFase1] : [...questoesFase2];
+        questaoAtual = 0;
+        erros = 0;
+        document.getElementById("popupMessage").innerText = textosSite[idiomaAtual].reiniciar;
+        document.getElementById("popup").style.display = "flex";
+        return;
+      }
+      const errada = fila[questaoAtual];
+      fila.splice(questaoAtual, 1);
+      const pos = Math.floor(Math.random() * (fila.length + 1));
+      fila.splice(pos, 0, errada);
+      document.getElementById("popupMessage").innerText = textosSite[idiomaAtual].erro;
+      document.getElementById("popup").style.display = "flex";
+    }
+  }
+
+  function proximaQuestao() {
+    document.getElementById("popup").style.display = "none";
+    questaoAtual++;
+    if (questaoAtual >= fila.length) {
+      document.getElementById("popupMessage").innerText = textosSite[idiomaAtual].fim;
+      document.getElementById("popup").style.display = "flex";
+
+      if (faseAtual === 1) {
+        const fase2 = document.querySelectorAll('.start')[1];
+        fase2.disabled = false;
+        fase2.innerText = idiomaAtual === "en" ? "START" : "COMEÇAR";
+
+        const icone = document.querySelectorAll('.lesson')[1];
+        icone.classList.add("success");
+        icone.innerText = textosSite[idiomaAtual].estrela;
+      }
+
+      questaoAtual = 0;
+      erros = 0;
+      fila = faseAtual === 1 ? [...questoesFase1] : [...questoesFase2];
+      return;
+    }
+    setTimeout(() => {
+      document.querySelectorAll('.option').forEach(btn => btn.disabled = false);
+      renderizarQuestao();
+    }, 100);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    aplicarIdioma('pt');
+    traduzirQuestoes();
+    const botoes = document.querySelectorAll('.start');
+    botoes[0].addEventListener('click', () => iniciarFase(1));
+    botoes[1].addEventListener('click', () => iniciarFase(2));
+    document.getElementById('fechar-minigame').addEventListener('click', () => {
+      document.getElementById('minigame-modal').classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('pt-br').addEventListener('click', () => {
+      aplicarIdioma('pt');
+      traduzirQuestoes();
+      document.getElementById('pt-br').classList.add('active');
+      document.getElementById('en-us').classList.remove('active');
+    });
+    document.getElementById('en-us').addEventListener('click', () => {
+      aplicarIdioma('en');
+      traduzirQuestoes();
+      document.getElementById('en-us').classList.add('active');
+      document.getElementById('pt-br').classList.remove('active');
+    });
+  });
   </script>
 </body>
 </html>
